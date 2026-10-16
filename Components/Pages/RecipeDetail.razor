@@ -1,0 +1,64 @@
+@page "/recipe/{Id:int}"
+@inject RecipeService Recipes
+
+@if (recipe is null)
+{
+    <PageTitle>Recipe not found</PageTitle>
+    <div class="alert alert-warning mt-4">Sorry, we couldn't find that recipe.</div>
+    <a href="recipes" class="btn btn-dark">← Back to search</a>
+}
+else
+{
+    <PageTitle>@recipe.Name</PageTitle>
+
+    <a href="recipes" class="btn btn-link ps-0">← Back to search</a>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <img src="@recipe.ImageUrl" alt="@recipe.Name" class="img-fluid rounded shadow" />
+        </div>
+        <div class="col-lg-6">
+            <span class="badge bg-warning text-dark">@recipe.Category</span>
+            <h1 class="mt-2">@recipe.Name</h1>
+            <p class="lead">@recipe.Description</p>
+            <ul class="list-inline">
+                <li class="list-inline-item">🥣 Prep: @recipe.PrepMinutes min</li>
+                <li class="list-inline-item">🔥 Cook: @recipe.CookMinutes min</li>
+                <li class="list-inline-item">🍽 Serves: @recipe.Servings</li>
+            </ul>
+            @foreach (var t in recipe.Tags)
+            {
+                <a class="badge rounded-pill bg-secondary text-decoration-none me-1" href="recipes?q=@t">#@t</a>
+            }
+        </div>
+    </div>
+
+    <div class="row g-4 mt-2">
+        <div class="col-md-5">
+            <h3>Ingredients</h3>
+            <ul class="list-group">
+                @foreach (var i in recipe.Ingredients)
+                {
+                    <li class="list-group-item"><strong>@i.Quantity</strong> @i.Name</li>
+                }
+            </ul>
+        </div>
+        <div class="col-md-7">
+            <h3>How to Cook</h3>
+            <ol class="steps">
+                @foreach (var s in recipe.Steps)
+                {
+                    <li class="mb-3">@s</li>
+                }
+            </ol>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Recipe? recipe;
+
+    protected override void OnParametersSet() => recipe = Recipes.GetById(Id);
+}
