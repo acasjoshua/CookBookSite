@@ -1,0 +1,38 @@
+@page "/"
+@inject RecipeService Recipes
+@inject NavigationManager Nav
+
+<PageTitle>CookBookSite</PageTitle>
+
+<div class="hero text-center py-5 mb-4">
+    <h1 class="display-5">🍳 CookBookSite</h1>
+    <p class="lead">Search a dish, an ingredient or a category and learn how to cook it.</p>
+
+    <div class="input-group w-75 mx-auto">
+        <input class="form-control form-control-lg" placeholder="Try &quot;adobo&quot;, &quot;chicken&quot; or &quot;dessert&quot;"
+               @bind="query" @bind:event="oninput" @onkeydown="OnKeyDown" />
+        <button class="btn btn-warning btn-lg" @onclick="GoSearch">Search</button>
+    </div>
+</div>
+
+<h3 class="mb-3">Featured Recipes</h3>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    @foreach (var r in Recipes.GetAll().Take(6))
+    {
+        <div class="col">
+            <RecipeCard Recipe="r" />
+        </div>
+    }
+</div>
+
+@code {
+    private string query = string.Empty;
+
+    private void GoSearch() =>
+        Nav.NavigateTo($"recipes?q={Uri.EscapeDataString(query)}");
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") GoSearch();
+    }
+}
