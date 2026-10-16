@@ -2,23 +2,48 @@
 @rendermode InteractiveServer
 @inject RecipeService RecipeSvc
 
-<PageTitle>Search Recipes</PageTitle>
+<PageTitle>Search Recipes - CookBookSite</PageTitle>
 
-<h1>🔎 Search Recipes</h1>
+<div class="search-header-section">
+    <span class="section-kicker">RECIPE CATALOG</span>
+    <h1 class="section-title mb-2">🔎 Search Recipes</h1>
+    <p class="text-muted">Explore authentic home-cooked recipes by dish name, ingredients, or food category.</p>
+</div>
 
-<div class="row g-2 mb-4">
-    <div class="col-md-8">
-        <input class="form-control form-control-lg" placeholder="Search by dish, ingredient, or tag..."
-               @bind="Query" @bind:event="oninput" />
+<div class="search-controls-card">
+    <div class="row g-3 align-items-center">
+        <div class="col-lg-8">
+            <div class="search-input-wrapper">
+                <span class="search-input-icon" aria-hidden="true">🔍</span>
+                <input class="search-input-field" 
+                       placeholder="Search by dish name, ingredient, or tag (e.g., chicken, tamarind, pasta)..."
+                       @bind="Query" @bind:event="oninput" />
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <select class="category-select-field" @bind="Category">
+                <option value="">All Categories</option>
+                @foreach (var c in RecipeSvc.GetCategories())
+                {
+                    <option value="@c">@c</option>
+                }
+            </select>
+        </div>
     </div>
-    <div class="col-md-4">
-        <select class="form-select form-select-lg" @bind="Category">
-            <option value="">All categories</option>
-            @foreach (var c in RecipeSvc.GetCategories())
-            {
-                <option value="@c">@c</option>
-            }
-        </select>
+
+    <!-- Quick Filter Category Pills -->
+    <div class="category-pills-row">
+        <button class="category-pill-btn @(string.IsNullOrEmpty(Category) ? "active" : "")" 
+                @onclick="@(() => SetCategory(string.Empty))">
+            All
+        </button>
+        @foreach (var c in RecipeSvc.GetCategories())
+        {
+            <button class="category-pill-btn @(Category == c ? "active" : "")" 
+                    @onclick="@(() => SetCategory(c))">
+                @c
+            </button>
+        }
     </div>
 </div>
 
@@ -26,14 +51,38 @@
     var results = RecipeSvc.Search(Query, Category);
 }
 
+<div class="results-status-bar">
+    <span class="results-count-badge">
+        Showing @results.Count @(results.Count == 1 ? "recipe" : "recipes")
+        @if (!string.IsNullOrWhiteSpace(Category))
+        {
+            <span> in <strong>@Category</strong></span>
+        }
+    </span>
+    @if (!string.IsNullOrWhiteSpace(Query) || !string.IsNullOrWhiteSpace(Category))
+    {
+        <button class="btn btn-sm btn-link text-decoration-none" @onclick="ResetFilters">
+            Clear filters ✕
+        </button>
+    }
+</div>
+
 @if (results.Count == 0)
 {
-    <div class="alert alert-info">No recipes found. Try another word like "chicken" or "soup".</div>
+    <div class="empty-state-card">
+        <div class="empty-state-icon">🍲</div>
+        <h3 class="empty-state-title">No matching recipes found</h3>
+        <p class="empty-state-text">
+            We couldn't find any recipes matching your criteria. Try searching for common terms like "chicken", "garlic", "pork", or "soup".
+        </p>
+        <button class="btn hero-search-btn" @onclick="ResetFilters">
+            View All Recipes
+        </button>
+    </div>
 }
 else
 {
-    <p class="text-muted">@results.Count recipe(s) found</p>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         @foreach (var r in results)
         {
             <div class="col">
@@ -53,5 +102,16 @@ else
     protected override void OnInitialized()
     {
         Query = InitialQuery ?? string.Empty;
+    }
+
+    private void SetCategory(string category)
+    {
+        Category = category;
+    }
+
+    private void ResetFilters()
+    {
+        Query = string.Empty;
+        Category = string.Empty;
     }
 }

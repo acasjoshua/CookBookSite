@@ -2,21 +2,51 @@
 @inject RecipeService Recipes
 @inject NavigationManager Nav
 
-<PageTitle>CookBookSite</PageTitle>
+<PageTitle>CookBookSite - Home</PageTitle>
 
-<div class="hero text-center py-5 mb-4">
-    <h1 class="display-5">🍳 CookBookSite</h1>
-    <p class="lead">Search a dish, an ingredient or a category and learn how to cook it.</p>
+<div class="hero-banner mb-5">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <span class="hero-badge">🍳 Welcome to CookBook</span>
+            <h1 class="hero-title">CookBookSite</h1>
+            <p class="hero-lead">Search a dish, an ingredient or a category and learn how to cook it step-by-step.</p>
 
-    <div class="input-group w-75 mx-auto">
-        <input class="form-control form-control-lg" placeholder="Try &quot;adobo&quot;, &quot;chicken&quot; or &quot;dessert&quot;"
-               @bind="query" @bind:event="oninput" @onkeydown="OnKeyDown" />
-        <button class="btn btn-warning btn-lg" @onclick="GoSearch">Search</button>
+            <div class="hero-search-box">
+                <span class="search-box-icon" aria-hidden="true">🔍</span>
+                <input class="hero-search-input" 
+                       placeholder='Try "adobo", "chicken", or "dessert"...'
+                       @bind="query" @bind:event="oninput" @onkeydown="OnKeyDown" />
+                <button class="hero-search-btn" @onclick="GoSearch">Search</button>
+            </div>
+        </div>
+        <div class="col-lg-5 d-none d-lg-block text-center">
+            <div class="hero-decor-wrapper">
+                <div class="hero-circle hero-circle-lg">
+                    <span class="hero-food-emoji">🍗</span>
+                </div>
+                <div class="hero-circle hero-circle-md">
+                    <span class="hero-food-emoji">🍲</span>
+                </div>
+                <div class="hero-circle hero-circle-sm">
+                    <span class="hero-food-emoji">🥗</span>
+                </div>
+                <div class="hero-circle hero-circle-xs">
+                    <span class="hero-food-emoji">🥞</span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<h3 class="mb-3">Featured Recipes</h3>
-<div class="row row-cols-1 row-cols-md-3 g-4">
+<div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+        <span class="section-kicker">CURATED SELECTION</span>
+        <h2 class="section-title">Featured Recipes</h2>
+    </div>
+    <a href="recipes" class="view-all-link">View all recipes →</a>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     @foreach (var r in Recipes.GetAll().Take(6))
     {
         <div class="col">

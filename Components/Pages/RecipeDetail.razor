@@ -3,54 +3,103 @@
 
 @if (recipe is null)
 {
-    <PageTitle>Recipe not found</PageTitle>
-    <div class="alert alert-warning mt-4">Sorry, we couldn't find that recipe.</div>
-    <a href="recipes" class="btn btn-dark">← Back to search</a>
+    <PageTitle>Recipe Not Found - CookBookSite</PageTitle>
+    <div class="empty-state-card mt-4">
+        <div class="empty-state-icon">🍽</div>
+        <h3 class="empty-state-title">Recipe Not Found</h3>
+        <p class="empty-state-text">Sorry, we couldn't find the recipe you're looking for.</p>
+        <a href="recipes" class="btn hero-search-btn">← Back to search</a>
+    </div>
 }
 else
 {
-    <PageTitle>@recipe.Name</PageTitle>
+    <PageTitle>@recipe.Name - CookBookSite</PageTitle>
 
-    <a href="recipes" class="btn btn-link ps-0">← Back to search</a>
+    <a href="recipes" class="back-link">
+        <span aria-hidden="true">←</span> Back to recipes
+    </a>
 
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <img src="@recipe.ImageUrl" alt="@recipe.Name" class="img-fluid rounded shadow" />
-        </div>
-        <div class="col-lg-6">
-            <span class="badge bg-warning text-dark">@recipe.Category</span>
-            <h1 class="mt-2">@recipe.Name</h1>
-            <p class="lead">@recipe.Description</p>
-            <ul class="list-inline">
-                <li class="list-inline-item">🥣 Prep: @recipe.PrepMinutes min</li>
-                <li class="list-inline-item">🔥 Cook: @recipe.CookMinutes min</li>
-                <li class="list-inline-item">🍽 Serves: @recipe.Servings</li>
-            </ul>
-            @foreach (var t in recipe.Tags)
-            {
-                <a class="badge rounded-pill bg-secondary text-decoration-none me-1" href="recipes?q=@t">#@t</a>
-            }
+    <!-- Top Hero Card -->
+    <div class="detail-hero-card">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-6">
+                <img src="@recipe.ImageUrl" alt="@recipe.Name" class="detail-img" />
+            </div>
+            <div class="col-lg-6">
+                <span class="detail-category-badge">@recipe.Category</span>
+                <h1 class="detail-title">@recipe.Name</h1>
+                <p class="detail-lead">@recipe.Description</p>
+
+                <div class="stats-grid">
+                    <div class="stat-chip">
+                        <span class="stat-icon">🥣</span>
+                        <span class="stat-label">Prep</span>
+                        <span class="stat-value">@recipe.PrepMinutes min</span>
+                    </div>
+                    <div class="stat-chip">
+                        <span class="stat-icon">🔥</span>
+                        <span class="stat-label">Cook</span>
+                        <span class="stat-value">@recipe.CookMinutes min</span>
+                    </div>
+                    <div class="stat-chip">
+                        <span class="stat-icon">🍽</span>
+                        <span class="stat-label">Serves</span>
+                        <span class="stat-value">@recipe.Servings</span>
+                    </div>
+                    <div class="stat-chip">
+                        <span class="stat-icon">⏱</span>
+                        <span class="stat-label">Total</span>
+                        <span class="stat-value">@recipe.TotalMinutes min</span>
+                    </div>
+                </div>
+
+                <div class="detail-tags-row">
+                    @foreach (var t in recipe.Tags)
+                    {
+                        <a class="detail-tag-pill" href="recipes?q=@t">#@t</a>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="row g-4 mt-2">
-        <div class="col-md-5">
-            <h3>Ingredients</h3>
-            <ul class="list-group">
-                @foreach (var i in recipe.Ingredients)
-                {
-                    <li class="list-group-item"><strong>@i.Quantity</strong> @i.Name</li>
-                }
-            </ul>
+    <!-- Bottom Section: Ingredients & Instructions -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-5">
+            <div class="detail-content-card">
+                <div class="content-card-title">
+                    <span>🥗 Ingredients</span>
+                    <span class="title-badge">@recipe.Ingredients.Count items</span>
+                </div>
+                <ul class="ingredients-list">
+                    @foreach (var i in recipe.Ingredients)
+                    {
+                        <li class="ingredient-item">
+                            <span class="ingredient-quantity">@i.Quantity</span>
+                            <span class="ingredient-name">@i.Name</span>
+                        </li>
+                    }
+                </ul>
+            </div>
         </div>
-        <div class="col-md-7">
-            <h3>How to Cook</h3>
-            <ol class="steps">
-                @foreach (var s in recipe.Steps)
-                {
-                    <li class="mb-3">@s</li>
-                }
-            </ol>
+        <div class="col-lg-7">
+            <div class="detail-content-card">
+                <div class="content-card-title">
+                    <span>👨‍🍳 How to Cook</span>
+                    <span class="title-badge">@recipe.Steps.Count steps</span>
+                </div>
+                <div class="cooking-steps-list">
+                    @for (int index = 0; index < recipe.Steps.Count; index++)
+                    {
+                        var stepNumber = index + 1;
+                        var stepText = recipe.Steps[index];
+                        <div class="step-card-item">
+                            <div class="step-number-bubble">@stepNumber</div>
+                            <p class="step-instruction-text">@stepText</p>
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 }
