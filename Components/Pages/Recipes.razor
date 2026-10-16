@@ -1,0 +1,57 @@
+@page "/recipes"
+@rendermode InteractiveServer
+@inject RecipeService RecipeSvc
+
+<PageTitle>Search Recipes</PageTitle>
+
+<h1>🔎 Search Recipes</h1>
+
+<div class="row g-2 mb-4">
+    <div class="col-md-8">
+        <input class="form-control form-control-lg" placeholder="Search by dish, ingredient, or tag..."
+               @bind="Query" @bind:event="oninput" />
+    </div>
+    <div class="col-md-4">
+        <select class="form-select form-select-lg" @bind="Category">
+            <option value="">All categories</option>
+            @foreach (var c in RecipeSvc.GetCategories())
+            {
+                <option value="@c">@c</option>
+            }
+        </select>
+    </div>
+</div>
+
+@{
+    var results = RecipeSvc.Search(Query, Category);
+}
+
+@if (results.Count == 0)
+{
+    <div class="alert alert-info">No recipes found. Try another word like "chicken" or "soup".</div>
+}
+else
+{
+    <p class="text-muted">@results.Count recipe(s) found</p>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var r in results)
+        {
+            <div class="col">
+                <RecipeCard Recipe="r" />
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? InitialQuery { get; set; }
+
+    private string Query { get; set; } = string.Empty;
+    private string Category { get; set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        Query = InitialQuery ?? string.Empty;
+    }
+}
