@@ -10,7 +10,7 @@ public class RecipeService
         {
             Id = 1, Name = "Chicken Adobo", Category = "Main Dish",
             Description = "The Philippines' unofficial national dish: chicken braised in soy sauce, vinegar and garlic.",
-            ImageUrl = "images/chicken-adobo.svg", PrepMinutes = 15, CookMinutes = 40, Servings = 4,
+            ImageUrl = "images/chicken-adobo.jpg", PrepMinutes = 15, CookMinutes = 40, Servings = 4,
             Tags = new() { "chicken", "filipino", "rice", "savory" },
             Ingredients = new()
             {
@@ -30,7 +30,7 @@ public class RecipeService
         {
             Id = 2, Name = "Pork Sinigang", Category = "Soup",
             Description = "A sour and savory pork soup with vegetables, soured with tamarind.",
-            ImageUrl = "images/pork-sinigang.svg", PrepMinutes = 15, CookMinutes = 60, Servings = 5,
+            ImageUrl = "images/pork-sinigang.jpg", PrepMinutes = 15, CookMinutes = 60, Servings = 5,
             Tags = new() { "pork", "soup", "sour", "filipino" },
             Ingredients = new()
             {
@@ -51,7 +51,7 @@ public class RecipeService
         {
             Id = 3, Name = "Kinilaw na Tanigue", Category = "Appetizer",
             Description = "A Visayan ceviche: fresh fish cured in vinegar and calamansi with ginger and chili.",
-            ImageUrl = "images/kinilaw.svg", PrepMinutes = 20, CookMinutes = 0, Servings = 4,
+            ImageUrl = "images/kinilaw.jpg", PrepMinutes = 20, CookMinutes = 0, Servings = 4,
             Tags = new() { "fish", "seafood", "raw", "visayan", "cebu" },
             Ingredients = new()
             {
@@ -71,7 +71,7 @@ public class RecipeService
         {
             Id = 4, Name = "Lechon Kawali", Category = "Main Dish",
             Description = "Crispy deep-fried pork belly with crackling skin and juicy meat.",
-            ImageUrl = "images/lechon-kawali.svg", PrepMinutes = 20, CookMinutes = 90, Servings = 6,
+            ImageUrl = "images/lechon-kawali.jpg", PrepMinutes = 20, CookMinutes = 90, Servings = 6,
             Tags = new() { "pork", "crispy", "fried", "filipino" },
             Ingredients = new()
             {
@@ -90,7 +90,7 @@ public class RecipeService
         {
             Id = 5, Name = "Pancit Canton", Category = "Noodles",
             Description = "Stir-fried egg noodles with vegetables and meat, a staple at celebrations.",
-            ImageUrl = "images/pancit-canton.svg", PrepMinutes = 15, CookMinutes = 20, Servings = 4,
+            ImageUrl = "images/pancit-canton.jpg", PrepMinutes = 15, CookMinutes = 20, Servings = 4,
             Tags = new() { "noodles", "chicken", "vegetables", "filipino", "birthday" },
             Ingredients = new()
             {
@@ -111,7 +111,7 @@ public class RecipeService
         {
             Id = 6, Name = "Tinolang Manok", Category = "Soup",
             Description = "A comforting ginger chicken soup with green papaya and chili leaves.",
-            ImageUrl = "images/tinola.svg", PrepMinutes = 10, CookMinutes = 35, Servings = 4,
+            ImageUrl = "images/tinola.jpg", PrepMinutes = 10, CookMinutes = 35, Servings = 4,
             Tags = new() { "chicken", "soup", "ginger", "filipino", "healthy" },
             Ingredients = new()
             {
@@ -131,7 +131,7 @@ public class RecipeService
         {
             Id = 7, Name = "Leche Flan", Category = "Dessert",
             Description = "A silky, rich caramel custard made with egg yolks and condensed milk.",
-            ImageUrl = "images/leche-flan.svg", PrepMinutes = 20, CookMinutes = 50, Servings = 8,
+            ImageUrl = "images/leche-flan.jpg", PrepMinutes = 20, CookMinutes = 50, Servings = 8,
             Tags = new() { "dessert", "sweet", "egg", "caramel", "filipino" },
             Ingredients = new()
             {
@@ -151,7 +151,7 @@ public class RecipeService
         {
             Id = 8, Name = "Spaghetti Carbonara", Category = "Pasta",
             Description = "Classic Roman pasta with eggs, cheese, crispy bacon and black pepper.",
-            ImageUrl = "images/carbonara.svg", PrepMinutes = 10, CookMinutes = 15, Servings = 2,
+            ImageUrl = "images/carbonara.jpg", PrepMinutes = 10, CookMinutes = 15, Servings = 2,
             Tags = new() { "pasta", "italian", "bacon", "egg", "quick" },
             Ingredients = new()
             {
@@ -171,7 +171,7 @@ public class RecipeService
         {
             Id = 9, Name = "Fluffy Pancakes", Category = "Breakfast",
             Description = "Thick, soft pancakes perfect with butter and maple syrup.",
-            ImageUrl = "images/pancakes.svg", PrepMinutes = 10, CookMinutes = 15, Servings = 4,
+            ImageUrl = "images/pancakes.jpg", PrepMinutes = 10, CookMinutes = 15, Servings = 4,
             Tags = new() { "breakfast", "sweet", "egg", "milk", "quick" },
             Ingredients = new()
             {
