@@ -1,22 +1,36 @@
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">🍳 CookBookSite</a>
-    </div>
+<div class="sidebar-header">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="">
+        <span class="brand-icon">🍳</span>
+        <span class="brand-name">CookBookSite</span>
+    </a>
 </div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
+    <nav class="nav-menu">
+        <div class="nav-category-header">EXPLORE</div>
+        <div class="nav-item">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span aria-hidden="true">🏠</span>&nbsp; Home
+                <span class="nav-icon" aria-hidden="true">🏠</span>
+                <span class="nav-text">Home</span>
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="recipes">
-                <span aria-hidden="true">🔎</span>&nbsp; Search Recipes
+                <span class="nav-icon" aria-hidden="true">🔎</span>
+                <span class="nav-text">Search Recipes</span>
             </NavLink>
         </div>
     </nav>
+
+    <div class="sidebar-footer">
+        <div class="sidebar-tip-card">
+            <div class="tip-icon">✨</div>
+            <div class="tip-body">
+                <div class="tip-title">Fresh Recipes</div>
+                <div class="tip-desc">Step-by-step guides for mouthwatering dishes</div>
+            </div>
+        </div>
+    </div>
 </div>
