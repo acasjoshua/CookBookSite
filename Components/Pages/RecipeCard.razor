@@ -1,0 +1,16 @@
+<div class="card h-100 shadow-sm recipe-card">
+    <img src="@Recipe.ImageUrl" class="card-img-top" alt="@Recipe.Name" />
+    <div class="card-body">
+        <span class="badge bg-warning text-dark mb-2">@Recipe.Category</span>
+        <h5 class="card-title">@Recipe.Name</h5>
+        <p class="card-text text-muted">@Recipe.Description</p>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center">
+        <small class="text-muted">⏱ @Recipe.TotalMinutes min · 🍽 @Recipe.Servings servings</small>
+        <a class="btn btn-sm btn-outline-dark" href="recipe/@Recipe.Id">View Recipe</a>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Recipe Recipe { get; set; } = default!;
+}
