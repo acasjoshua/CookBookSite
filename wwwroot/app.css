@@ -894,3 +894,6 @@ h1, h2, h3, h4, h5, h6 {
         margin-right: 0;
     }
 }
+
+.recipe-field { border: 1.5px solid var(--border-color); border-radius: var(--radius-md); background: #FAF8F5; padding: 0.7rem 1rem; }
+.recipe-field:focus { background: #fff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(232,121,40,.12); }
