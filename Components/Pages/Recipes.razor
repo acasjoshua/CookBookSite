@@ -4,10 +4,13 @@
 
 <PageTitle>Search Recipes - CookBookSite</PageTitle>
 
-<div class="search-header-section">
-    <span class="section-kicker">RECIPE CATALOG</span>
-    <h1 class="section-title mb-2">🔎 Search Recipes</h1>
-    <p class="text-muted">Explore authentic home-cooked recipes by dish name, ingredients, or food category.</p>
+<div class="search-header-section d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <div>
+        <span class="section-kicker">RECIPE CATALOG</span>
+        <h1 class="section-title mb-2">🔎 Search Recipes</h1>
+        <p class="text-muted">Explore authentic home-cooked recipes by dish name, ingredients, or food category.</p>
+    </div>
+    <a href="recipes/new" class="btn hero-search-btn">＋ Add recipe</a>
 </div>
 
 <div class="search-controls-card">
@@ -16,14 +19,14 @@
             <div class="search-input-wrapper">
                 <span class="search-input-icon" aria-hidden="true">🔍</span>
                 <input class="search-input-field" 
-                       placeholder="Search by dish name, ingredient, or tag (e.g., chicken, tamarind, pasta)..."
-                       @bind="Query" @bind:event="oninput" />
+                       placeholder="Search by dish name, description or category (e.g., chicken, tamarind, pasta)..."
+                       value="@Query" @oninput="OnQueryInput" />
             </div>
         </div>
         <div class="col-lg-4">
-            <select class="category-select-field" @bind="Category">
+            <select class="category-select-field" @bind="Category" @bind:after="Load">
                 <option value="">All Categories</option>
-                @foreach (var c in RecipeSvc.GetCategories())
+                @foreach (var c in categories)
                 {
                     <option value="@c">@c</option>
                 }
@@ -37,7 +40,7 @@
                 @onclick="@(() => SetCategory(string.Empty))">
             All
         </button>
-        @foreach (var c in RecipeSvc.GetCategories())
+        @foreach (var c in categories)
         {
             <button class="category-pill-btn @(Category == c ? "active" : "")" 
                     @onclick="@(() => SetCategory(c))">
@@ -47,49 +50,56 @@
     </div>
 </div>
 
-@{
-    var results = RecipeSvc.Search(Query, Category);
-}
-
-<div class="results-status-bar">
-    <span class="results-count-badge">
-        Showing @results.Count @(results.Count == 1 ? "recipe" : "recipes")
-        @if (!string.IsNullOrWhiteSpace(Category))
-        {
-            <span> in <strong>@Category</strong></span>
-        }
-    </span>
-    @if (!string.IsNullOrWhiteSpace(Query) || !string.IsNullOrWhiteSpace(Category))
-    {
-        <button class="btn btn-sm btn-link text-decoration-none" @onclick="ResetFilters">
-            Clear filters ✕
-        </button>
-    }
-</div>
-
-@if (results.Count == 0)
+@if (error is not null)
 {
-    <div class="empty-state-card">
-        <div class="empty-state-icon">🍲</div>
-        <h3 class="empty-state-title">No matching recipes found</h3>
-        <p class="empty-state-text">
-            We couldn't find any recipes matching your criteria. Try searching for common terms like "chicken", "garlic", "pork", or "soup".
-        </p>
-        <button class="btn hero-search-btn" @onclick="ResetFilters">
-            View All Recipes
-        </button>
-    </div>
+    <div class="alert alert-danger">Could not load recipes: @error</div>
+}
+else if (loading)
+{
+    <p class="text-muted">Loading recipes…</p>
 }
 else
 {
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @foreach (var r in results)
+    <div class="results-status-bar">
+        <span class="results-count-badge">
+            Showing @results.Count @(results.Count == 1 ? "recipe" : "recipes")
+            @if (!string.IsNullOrWhiteSpace(Category))
+            {
+                <span> in <strong>@Category</strong></span>
+            }
+        </span>
+        @if (!string.IsNullOrWhiteSpace(Query) || !string.IsNullOrWhiteSpace(Category))
         {
-            <div class="col">
-                <RecipeCard Recipe="r" />
-            </div>
+            <button class="btn btn-sm btn-link text-decoration-none" @onclick="ResetFilters">
+                Clear filters ✕
+            </button>
         }
     </div>
+
+    @if (results.Count == 0)
+    {
+        <div class="empty-state-card">
+            <div class="empty-state-icon">🍲</div>
+            <h3 class="empty-state-title">No matching recipes found</h3>
+            <p class="empty-state-text">
+                We couldn't find any recipes matching your criteria. Try searching for common terms like "chicken", "garlic", "pork", or "soup".
+            </p>
+            <button class="btn hero-search-btn" @onclick="ResetFilters">
+                View All Recipes
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var r in results)
+            {
+                <div class="col">
+                    <RecipeCard Recipe="r" />
+                </div>
+            }
+        </div>
+    }
 }
 
 @code {
@@ -99,19 +109,70 @@ else
     private string Query { get; set; } = string.Empty;
     private string Category { get; set; } = string.Empty;
 
-    protected override void OnInitialized()
+    private List<Recipe> results = new();
+    private List<string> categories = new();
+    private bool loading = true;
+    private string? error;
+    private CancellationTokenSource? debounce;
+
+    protected override async Task OnInitializedAsync()
     {
         Query = InitialQuery ?? string.Empty;
+        try
+        {
+            // Load the categories ONCE. (Calling a method inside the markup would run it on every render.)
+            categories = await RecipeSvc.GetCategoriesAsync();
+            results = await RecipeSvc.SearchAsync(Query, Category);
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
     }
 
-    private void SetCategory(string category)
+    private async Task Load()
+    {
+        error = null;
+        try
+        {
+            results = await RecipeSvc.SearchAsync(Query, Category);
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    // Wait until the person pauses typing (300 ms) before asking the database.
+    private async Task OnQueryInput(ChangeEventArgs e)
+    {
+        Query = e.Value?.ToString() ?? string.Empty;
+
+        debounce?.Cancel();
+        debounce = new CancellationTokenSource();
+        var token = debounce.Token;
+        try
+        {
+            await Task.Delay(300, token);
+            await Load();
+        }
+        catch (TaskCanceledException) { /* a newer keystroke replaced this one */ }
+    }
+
+    private async Task SetCategory(string category)
     {
         Category = category;
+        await Load();
     }
 
-    private void ResetFilters()
+    private async Task ResetFilters()
     {
         Query = string.Empty;
         Category = string.Empty;
+        await Load();
     }
 }

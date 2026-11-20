@@ -1,0 +1,192 @@
+@page "/recipes/new"
+@page "/recipe/{Id:int}/edit"
+@rendermode InteractiveServer
+@inject RecipeService Recipes
+@inject NavigationManager Nav
+
+<PageTitle>@(IsEdit ? "Edit recipe" : "Add recipe") - CookBookSite</PageTitle>
+
+<a href="@(IsEdit ? $"recipe/{Id}" : "recipes")" class="back-link">
+    <span aria-hidden="true">←</span> Back
+</a>
+
+@if (loading)
+{
+    <p class="text-muted">Loading…</p>
+}
+else if (notFound)
+{
+    <div class="empty-state-card">
+        <div class="empty-state-icon">🍽</div>
+        <h3 class="empty-state-title">Recipe Not Found</h3>
+        <a href="recipes" class="btn hero-search-btn">← Back to recipes</a>
+    </div>
+}
+else
+{
+    <div class="search-controls-card">
+        <span class="section-kicker">@(IsEdit ? "EDIT RECIPE" : "NEW RECIPE")</span>
+        <h1 class="section-title mb-4">@(IsEdit ? "Edit " + form.Name : "Add a recipe")</h1>
+
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label fw-semibold">Name</label>
+                <input class="form-control recipe-field" @bind="form.Name" placeholder="Chicken Adobo" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Category</label>
+                <input class="form-control recipe-field" @bind="form.Category" list="category-list" placeholder="Main Dish" />
+                <datalist id="category-list">
+                    @foreach (var c in categories)
+                    {
+                        <option value="@c"></option>
+                    }
+                </datalist>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label fw-semibold">Description</label>
+                <textarea class="form-control recipe-field" rows="2" @bind="form.Description"></textarea>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Image path</label>
+                <input class="form-control recipe-field" @bind="form.ImageUrl" placeholder="images/chicken-adobo.jpg (blank = placeholder)" />
+            </div>
+            <div class="col-4 col-md-2">
+                <label class="form-label fw-semibold">Prep (min)</label>
+                <input type="number" min="0" class="form-control recipe-field" @bind="form.PrepMinutes" />
+            </div>
+            <div class="col-4 col-md-2">
+                <label class="form-label fw-semibold">Cook (min)</label>
+                <input type="number" min="0" class="form-control recipe-field" @bind="form.CookMinutes" />
+            </div>
+            <div class="col-4 col-md-2">
+                <label class="form-label fw-semibold">Serves</label>
+                <input type="number" min="1" class="form-control recipe-field" @bind="form.Servings" />
+            </div>
+
+            <div class="col-12">
+                <label class="form-label fw-semibold">Tags <span class="text-muted fw-normal">(separate with commas)</span></label>
+                <input class="form-control recipe-field" @bind="tagsText" placeholder="chicken, filipino, rice" />
+            </div>
+
+            <div class="col-lg-6">
+                <label class="form-label fw-semibold">Ingredients <span class="text-muted fw-normal">(one per line: quantity | name)</span></label>
+                <textarea class="form-control recipe-field" rows="8" @bind="ingredientsText"
+                          placeholder="1 kg | chicken thighs&#10;1/2 cup | soy sauce"></textarea>
+            </div>
+            <div class="col-lg-6">
+                <label class="form-label fw-semibold">Steps <span class="text-muted fw-normal">(one per line)</span></label>
+                <textarea class="form-control recipe-field" rows="8" @bind="stepsText"
+                          placeholder="Marinate the chicken for 30 minutes.&#10;Simmer until tender."></textarea>
+            </div>
+        </div>
+
+        @if (error is not null)
+        {
+            <div class="alert alert-danger mt-3 mb-0">@error</div>
+        }
+
+        <div class="d-flex gap-2 mt-4">
+            <button class="btn hero-search-btn" @onclick="Save" disabled="@saving">
+                @(saving ? "Saving…" : "Save recipe")
+            </button>
+            <a href="@(IsEdit ? $"recipe/{Id}" : "recipes")" class="btn btn-link text-decoration-none">Cancel</a>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }            // 0 on /recipes/new
+
+    private bool IsEdit => Id > 0;
+
+    private Recipe form = new() { Servings = 4 };
+    private List<string> categories = new();
+    private string tagsText = string.Empty;
+    private string ingredientsText = string.Empty;
+    private string stepsText = string.Empty;
+
+    private bool loading = true;
+    private bool notFound;
+    private bool saving;
+    private string? error;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        try
+        {
+            categories = await Recipes.GetCategoriesAsync();
+
+            if (IsEdit)
+            {
+                var existing = await Recipes.GetByIdAsync(Id);
+                if (existing is null) { notFound = true; return; }
+
+                form = existing;
+                tagsText = string.Join(", ", existing.Tags);
+                ingredientsText = string.Join("\n", existing.Ingredients.Select(i => $"{i.Quantity} | {i.Name}"));
+                stepsText = string.Join("\n", existing.Steps);
+            }
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task Save()
+    {
+        if (saving) return;                            // a double click cannot send two POSTs
+        error = null;
+
+        if (string.IsNullOrWhiteSpace(form.Name)) { error = "Please enter a recipe name."; return; }
+        if (string.IsNullOrWhiteSpace(form.Category)) { error = "Please enter a category."; return; }
+        if (form.Servings < 1) { error = "Servings must be at least 1."; return; }
+
+        saving = true;
+        try
+        {
+            form.Tags = tagsText.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+            form.Steps = SplitLines(stepsText);
+            form.Ingredients = SplitLines(ingredientsText)
+                .Select(ParseIngredient)
+                .Where(i => !string.IsNullOrWhiteSpace(i.Name))
+                .ToList();
+            if (string.IsNullOrWhiteSpace(form.ImageUrl)) form.ImageUrl = "images/placeholder.svg";
+
+            int id;
+            if (IsEdit)
+            {
+                await Recipes.UpdateAsync(form);       // PATCH
+                id = form.Id;
+            }
+            else
+            {
+                id = await Recipes.AddAsync(form);     // POST
+            }
+            Nav.NavigateTo($"recipe/{id}");
+        }
+        catch (Exception ex)
+        {
+            error = "Could not save: " + ex.Message;
+            saving = false;
+        }
+    }
+
+    private static List<string> SplitLines(string text) =>
+        text.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+    // "1 kg | chicken thighs"  ->  quantity "1 kg", name "chicken thighs"
+    private static Ingredient ParseIngredient(string line)
+    {
+        var parts = line.Split('|', 2, StringSplitOptions.TrimEntries);
+        return parts.Length == 2 ? new Ingredient(parts[0], parts[1]) : new Ingredient(string.Empty, parts[0]);
+    }
+}

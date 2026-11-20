@@ -1,7 +1,14 @@
 @page "/recipe/{Id:int}"
+@rendermode InteractiveServer
 @inject RecipeService Recipes
+@inject NavigationManager Nav
+@inject IJSRuntime JS
 
-@if (recipe is null)
+@if (loading)
+{
+    <p class="text-muted mt-4">Loading recipe…</p>
+}
+else if (recipe is null)
 {
     <PageTitle>Recipe Not Found - CookBookSite</PageTitle>
     <div class="empty-state-card mt-4">
@@ -15,9 +22,17 @@ else
 {
     <PageTitle>@recipe.Name - CookBookSite</PageTitle>
 
-    <a href="recipes" class="back-link">
-        <span aria-hidden="true">←</span> Back to recipes
-    </a>
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <a href="recipes" class="back-link">
+            <span aria-hidden="true">←</span> Back to recipes
+        </a>
+        <div class="d-flex gap-2">
+            <a href="recipe/@recipe.Id/edit" class="btn-view-recipe">✏️ Edit</a>
+            <button class="btn btn-sm btn-outline-danger rounded-pill" @onclick="Delete" disabled="@deleting">
+                🗑 Delete
+            </button>
+        </div>
+    </div>
 
     <!-- Top Hero Card -->
     <div class="detail-hero-card">
@@ -108,6 +123,23 @@ else
     [Parameter] public int Id { get; set; }
 
     private Recipe? recipe;
+    private bool loading = true;
+    private bool deleting;
 
-    protected override void OnParametersSet() => recipe = Recipes.GetById(Id);
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        recipe = await Recipes.GetByIdAsync(Id);
+        loading = false;
+    }
+
+    private async Task Delete()
+    {
+        if (recipe is null || deleting) return;
+        if (!await JS.InvokeAsync<bool>("confirm", $"Delete \"{recipe.Name}\"?")) return;
+
+        deleting = true;                              // the button is disabled while the request runs
+        await Recipes.SoftDeleteAsync(recipe.Id);     // soft delete: only fills in deleted_at
+        Nav.NavigateTo("recipes");
+    }
 }
